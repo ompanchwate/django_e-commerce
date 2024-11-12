@@ -185,7 +185,6 @@
         document.getElementById('div' + item).innerHTML = "<button id='minus" + item + "' class='btn btn-primary minus'>-</button> <span id='val" + item + "''>" + cart[item][0] + "</span> <button id='plus" + item + "' class='btn btn-primary plus'> + </button>";
         total += cart[item][0] // Add the Quantity of all the products present in the cart
       }
-      console.log(total)
       localStorage.setItem('cart', JSON.stringify(cart));  // CONVERTS THE JSON OBJECT INTO STRING
       document.getElementById('cartcount').innerHTML = total;  // Updates the Count on the Cart Button
       updatePopover(cart)  // UPDATE THE PRODUCTS IN CART POPOVER
@@ -211,41 +210,54 @@
     // DISPLAYS THE PRODUCTS PRESENT IN CART ON A POPOVER 
     function updatePopover(cart) {
       console.log('We are inside updatePopover');
-      var popStr = "";
-      popStr = popStr + "<h5> Cart for your items in my shopping cart </h5><div class='mx-2 my-2'>";
-      var i = 1;
-      for (var item in cart) {
-        popStr = popStr + "<b>" + i + "</b>. ";
-        popStr = popStr + document.getElementById('name' + item).innerHTML.slice(0, 19) + "... Qty: " + cart[item][0] + '<br>';
-        i = i + 1;
+      let popStr = `
+        <h5> Cart for your items in my shopping cart </h5>
+        <div class='mx-2 my-2'>
+      `;
+      
+      let i = 1;
+      for (let item in cart) {
+        const itemName = document.getElementById('name' + item)?.innerHTML.slice(0, 19) || "Unnamed Item";
+        const quantity = cart[item][0];
+        
+        popStr += `
+          <div class="cart-item d-flex justify-content-between align-items-center mb-2">
+            <div class="item-info">
+              <span class="item-number badge badge-secondary mr-2">${i}</span>
+              <b>${itemName}</b>
+            </div>
+            <span class="quantity badge badge-light">Qty: ${quantity}</span>
+          </div>
+        `;
+        i++;
       }
-      popStr = popStr + "</div> <a href='/shop/checkout'  class='btn btn-primary' id ='checkout'>Checkout</a> <br>      "
-      popStr = popStr + "<a class='btn btn-primary' href='javascript:clearCart()'  id ='clearCart'>Clear Cart</a>"
-      console.log(popStr);
+      
+      popStr += `
+        </div>
+        <div class='d-flex justify-content-around p-2'>
+          <a href='/shop/checkout' class='btn btn-primary' id='checkout'>Checkout</a>
+          <a href='javascript:void(0)' class='btn btn-primary' id='clearCart'>Clear Cart</a>
+        </div>
+      `;
+      
       document.getElementById('popcart').setAttribute('data-content', popStr);
       $('#popcart').popover('show');
-
+    
+      // Attach the clearCart event to the new button
+      document.getElementById('clearCart').onclick = clearCart;
     }
-
+    
     function clearCart() {
-      cart = JSON.parse(localStorage.getItem('cart'));
-      for (var item in cart) {
-        document.getElementById('div' + item).innerHTML = '<button id="' + item + '" class="btn btn-primary cart">Add To Cart</button>'
+      console.log("Clearing cart...");
+      const cart = JSON.parse(localStorage.getItem('cart')) || {};
+      for (const item in cart) {
+        document.getElementById('div' + item).innerHTML = `<button id="${item}" class="btn btn-primary cart">Add To Cart</button>`;
       }
       localStorage.clear();
-      cart = {};
-      updateCart(cart);
+      updatePopover({});
+      updateCart({});
     }
-
-    $('.clearCart').click(function () {
-      cart = JSON.parse(localStorage.getItem('cart'));
-      for (var item in cart) {
-        document.getElementById('div' + item).innerHTML = '<button id="' + item + '" class="btn btn-primary cart">Add To Cart</button>'
-      }
-      localStorage.clear();
-      cart = {};
-      updateCart(cart);
-    });
+    
 
   </script>
 
